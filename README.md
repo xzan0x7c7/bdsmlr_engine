@@ -2,14 +2,6 @@
 
 Download bdsmlr blog images.
 
-#### Extra Credits
-
-The log in and link collection are take from this repository. and this script
-specifically https://github.com/6fe9d454/bdsmlr-scripts/blob/master/bdsmlr_get_blog_fast.py
-
-Some changes like true end page were making the script crash, or rendered it non
-usable, also added download image functionality, refactored it, and dockerized it.
-
 ### Run with Docker
 
 Add environment variables on `docker/bdsmlr/.env` check the `.env.example` in that same directory, if any doubts.
@@ -18,18 +10,16 @@ Add environment variables on `docker/bdsmlr/.env` check the `.env.example` in th
 - PASSWORD - your bdsmlr password
 
 
-#### Build Image
+To run the compose feed since it's the only workable at the moment.
 
 ```
-docker build --tag=bdsmlr:latest .
+~$ docker-compose up --build --detach feed
 ```
 
-#### Run Container
+Examples
 
-Use the helper script, mounts bind; retreives images and make them
-available. Run the command with `--help` option to see full options. 
-
+```bash
+~$ curl http://172.19.0.2:8888/get-env
+~$ curl http://172.19.0.2:8888/get-blogs
+~$ curl http://172.19.0.2:8888/get-ping
 ```
-~$./run_docker --help
-```
-

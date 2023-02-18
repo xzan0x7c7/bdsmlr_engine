@@ -42,6 +42,7 @@ def image_name(link):
 
 
 def downloader(file_name, session):
+    logger.info("opening file %s" % file_name)
     with open(file_name, "r") as ts:
         links = ts.readlines()
     
@@ -217,7 +218,10 @@ def main(args):
     downloader(output_file, session)
 
     logger.info(" Cleanup ...")
-    os.unlink(output)
+    try:
+        os.unlink(output)
+    except Exception as error:
+        logger.info("Cleaned")
 
 
 
