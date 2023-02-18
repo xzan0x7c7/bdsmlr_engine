@@ -1,6 +1,6 @@
 ## BDSMLR ENGINE
 
-Download bdsmlr blog images.
+BDSMLR Collector, publisher, feed.
 
 #### Next Steps (TO DO)
 
