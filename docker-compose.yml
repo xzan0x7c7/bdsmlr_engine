@@ -1,0 +1,83 @@
+version: '3.9'
+
+services:
+  feed:
+    container_name: feed
+    build:
+      context: .
+      dockerfile: ./docker/bdsmlr/Dockerfile
+    command: >
+      sh -c "python3 /src/agent.py"
+    env_file:
+      - ./docker/bdsmlr/.env
+    volumes:
+      - ./docker/bdsmlr/src/:/src/
+      - ./src/images:/src/images
+    restart: unless-stopped
+    expose:
+      - 8888
+    networks:
+      main-network:
+        ipv4_address: 172.19.0.2
+
+  publisher:
+    container_name: publisher
+    build:
+      context: .
+      dockerfile: ./docker/publisher/Dockerfile'
+    env_file:
+      - ./docker/bdsmlr/.env
+    volumes:
+      - ./docker/manager/src:/src
+      - ./src/images:/src/images
+    restart: unless-stopped
+    depends_on:
+      - feed
+    networks:
+      main-network:
+        ipv4_address: 172.19.0.3
+
+  manager:
+    container_name: manager
+    build: 
+      context: .
+      dockerfile: ./docker/manager/Dockerfile
+    env_file:
+      - ./docker/manager/.env
+    volumes:
+      - ./docker/manager/src:/src
+      - ./src/images:/src/images
+    depends_on:
+      - database
+    restart: unless-stopped
+    networks:
+      main-network:
+        ipv4_address: 172.19.0.4
+    expose:
+      - 6969
+
+  database:
+    container_name: database
+    image: postgres
+    environment:
+      POSTGRES_USER: "shakemama"
+      POSTGRES_PASSWORD: "koolAidRia1357"
+      POSTGRES_DB: "bdsmlr_engine"
+    volumes:
+      - database_volume:/var/lib/postgresql/data
+    restart: unless-stopped
+    networks:
+      main-network:
+        ipv4_address: 172.19.0.5
+    expose:
+      - 5432
+
+volumes:
+  database_volume: {}
+
+networks:
+  main-network:
+    name: main-network
+    ipam:
+      config:
+        - subnet: 172.19.0.0/24

@@ -11,7 +11,6 @@ Download bdsmlr blog images.
     - [ ] Monitor tasks.
 - [ ] Create docker-compose file.
 
-
 ### Run with Docker
 
 Add environment variables on `docker/bdsmlr/.env` check the `.env.example` in that same directory, if any doubts.
@@ -19,25 +18,19 @@ Add environment variables on `docker/bdsmlr/.env` check the `.env.example` in th
 - USERNAME - your bdsml username
 - PASSWORD - your bdsmlr password
 
-#### Build Image
+
+To run the compose feed since it's the only workable at the moment.
 
 ```
-docker build --tag=bdsmlr:latest .
+~$ docker-compose up --build --detach feed
 ```
 
-#### Run Container
+Examples
 
-Use the helper script, mounts bind; retreives images and make them
-available. Run the command with `--help` option to see full options. 
-
-```
-~$./run_docker --help
-```
-
-#### Example run
-
-```
-~$ ./docker_run.sh https://porncomicsandhentai.bdsmlr.com --streak-limit=5 --max-images=10
+```bash
+~$ curl http://172.19.0.2:8888/get-env
+~$ curl http://172.19.0.2:8888/get-blogs
+~$ curl http://172.19.0.2:8888/get-ping
 ```
 
 ### Credit where credit is due.
