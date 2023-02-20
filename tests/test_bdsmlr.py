@@ -13,16 +13,24 @@ class TestFunctionality(unittest.TestCase):
         self.assertTrue(resp.status_code == 200)
 
     def test_delete_blog(self):
-        pass
+        resp = requests.post(
+            "%s/delete-blog" % self.url,
+            data={"blog" : "0"}
+        )
+        self.assertTrue(resp.status_code == 200)
     
     def test_get_blogs(self):
-        pass
+        resp = requests.get(
+            "%s/get-blogs" % self.url,
+        )
+        self.assertTrue(resp.status_code == 200)
 
     def test_get_env(self):
-        pass
+        resp = requests.get(
+            "%s/env-stats" % self.url,
+        )
+        self.assertTrue(resp.status_code == 200)
 
-    def test_ping(self):
-        pass
 
 if __name__ == "__main__":
     unittest.main()
