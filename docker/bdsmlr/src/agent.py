@@ -128,6 +128,17 @@ def make_runs():
     logger.info("Finished main run %s" % Env.runs["main_runs"])
     return True
 
+@scheduler.task(
+    'cron', 
+    id='upload_shred', 
+    hour="*/1",
+    minute="30"
+)
+def upload_shred():
+    # TO DO:
+    # iterate dirty image folder and upload to manager.
+    pass
+
 
 @app.route("/ping", methods=["GET"])
 def ping():
