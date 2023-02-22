@@ -6,5 +6,5 @@ COPY ./docker/manager/src .
 
 COPY ./docker/manager/requirements.txt .
 
-RUN python3 -m pip install requirements.txt
+RUN python3 -m pip install -r requirements.txt
 
