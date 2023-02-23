@@ -141,8 +141,8 @@ Env = Environment()
 @scheduler.task(
     'cron', 
     id='make_runs', 
-    #hour="*/1",
-    minute="*/2"
+    hour="*/1",
+    minute="2"
 )
 def make_runs():
     try:
