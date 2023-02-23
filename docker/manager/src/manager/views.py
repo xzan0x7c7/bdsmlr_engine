@@ -12,7 +12,6 @@ logger = logging.getLogger(__name__)
 
 
 class UploadDirtyImage(APIView):
-    
     def post(self, request, *args, **kwargs):
         dirty_image = request.FILES.get("file")
         if dirty_image is None:
@@ -32,9 +31,7 @@ class UploadDirtyImage(APIView):
             status=200
         )
 
-
 class EnvStats(APIView):
-
     def get(self, request, *args, **kwargs):
         try:
             resp = requests.get(
@@ -61,7 +58,6 @@ class EnvStats(APIView):
 
 
 class EnvSwitch(APIView):
-
     def post(self, request, *args, **kwargs):
         status = request.data.get("status")
         if status is None:
@@ -113,4 +109,3 @@ class DeleteBlog(APIView):
 class GetBlogs(APIView):
     def get(self, request, *args, **kwargs):
         raise NotImplementedError()
-
