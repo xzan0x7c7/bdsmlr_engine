@@ -2,7 +2,7 @@ from django.db import models
 
 
 def dirty_image_path(instance, filename):
-    return '%s/%s' % (instance.pk, filename)
+    return '%s/%s' % ("dirty_images", filename)
 
 
 class DirtyImage(models.Model):

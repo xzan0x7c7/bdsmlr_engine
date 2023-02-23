@@ -104,7 +104,36 @@ class Environment(object):
                         self.blogs[each]
                     ]
                 )
-            
+
+    def upload_images(self):
+        for dp in os.listdir(os.path.join(THIS_DIR, "images")):
+            up = os.path.join(THIS_DIR, "images", dp)
+            if os.path.exists(up):
+                op = self.upload(up)
+                if op:
+                    logger.info("Unlinking image %s" % up)
+                    os.unlink(up)
+                    continue
+                logger.info("Unable to upload image %s" % up)
+                continue
+            logger.info("File %s does not exist" % up)
+        return True
+
+    def upload(self, img):
+        try:
+            resp = requests.post(
+                "http://manager:6969/api/upload-dirty-image",
+                files={
+                    "file" : open(img, "rb").read()
+                }
+            )
+            if resp.status_code != 200:
+                raise Exception("Unable to upload image %s" % img)
+        except Exception as error:
+            logger.info(str(error))
+            return False
+        return True
+
 
 Env = Environment()
 
@@ -112,8 +141,8 @@ Env = Environment()
 @scheduler.task(
     'cron', 
     id='make_runs', 
-    hour="*/1",
-    minute="1"
+    #hour="*/1",
+    minute="*/2"
 )
 def make_runs():
     try:
@@ -128,6 +157,7 @@ def make_runs():
     logger.info("Finished main run %s" % Env.runs["main_runs"])
     return True
 
+
 @scheduler.task(
     'cron', 
     id='upload_shred', 
@@ -135,9 +165,12 @@ def make_runs():
     minute="30"
 )
 def upload_shred():
-    # TO DO:
-    # iterate dirty image folder and upload to manager.
-    pass
+    try:
+        Env.upload_images()
+    except Exception as error:
+        logger.error(str(error))
+        return False
+    return True
 
 
 @app.route("/ping", methods=["GET"])
@@ -278,6 +311,20 @@ def set_attr():
     )
     return jsonify(
         message="%s set to %s" % (attr, value)
+    ), 200
+
+
+@app.route("/upload-images", methods=["POST"])
+def upload_images():
+    try:
+        Env.upload_images()
+    except Exception as error:
+        logger.info(str(error))
+        return jsonify(
+            message="Unable to upload"
+        ), 400
+    return jsonify(
+        message="Uploaded images"
     ), 200
 
 
