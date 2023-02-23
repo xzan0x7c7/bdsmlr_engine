@@ -3,5 +3,6 @@
 venv
 images
 static
+media
 __pycache__
 
