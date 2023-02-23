@@ -1,9 +1,14 @@
+import logging
+
 import requests
 from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
 from manager.models import DirtyImage
+
+
+logger = logging.getLogger(__name__)
 
 
 class UploadDirtyImage(APIView):
