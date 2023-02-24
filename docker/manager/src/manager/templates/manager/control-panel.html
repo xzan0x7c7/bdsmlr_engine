@@ -1,7 +1,89 @@
 {% extends 'index.html' %}
-
-{% block title %} Control Panel {% endblock %}
+{% load static %}
+{% block extra_css %} 
+<link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+{% endblock %}
+{% block title %} 
+    Control Panel 
+{% endblock %}
 
 {% block content %}
-    
+<div class="main-panel">
+    <div class="panel-monitor">
+        <div class="panel-buttons">
+            <div class="panel-button">
+                <button id="refresh-feed-stats">
+                    Refresh Feed Stats
+                </button>
+            </div>
+        </div>
+        <pre id="feed-stats">
+
+        </pre>
+    </div>
+    <div class="panel-monitor">
+        <div class="panel-buttons">
+            <div class="panel-button">
+                <button id="refresh-loaded-blogs">
+                    Refresh Loaded Blogs
+                </button>
+            </div>
+        </div>
+        <pre id="loaded-blogs">
+
+        </pre>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_scripts %}
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+
+        function feedStats() {
+            $.get({
+                url : "{% url 'manager:feed_stats' %}",
+                success: function(response) {
+                    $("#feed-stats").text(
+                        JSON.stringify(
+                            response.message,
+                            null,
+                            2
+                        )
+                    )
+                },
+                error: function(error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function getFeedBlogs() {
+            $.get({
+                url : "{% url 'manager:get_feed_blogs' %}",
+                success: function(response) {
+                    $("#loaded-blogs").text(
+                        JSON.stringify(
+                            response.message.status,
+                            null,
+                            2
+                        )
+                    )
+                },
+                error: function(error) {
+                    console.log(error)
+                }
+            })
+        }
+
+        function main() {
+            feedStats()
+            getFeedBlogs()
+            $("#refresh-feed-stats").click(feedStats)
+            $("#refresh-loaded-blogs").click(getFeedBlogs)
+        }
+        
+        main()
+    })
+</script>
 {% endblock %}

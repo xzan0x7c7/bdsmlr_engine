@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
+  {% load static %}
   <title>{% block title %}{% endblock %}</title>
-  {% extra_css %} {% endblock %}
+  {% block extra_css %} {% endblock %}
 </head>
 <body>
 {% block content %} {% endblock %}
 </body>
-{% js_scripts %} {% endblock %}
+<script src="{% static 'js/jquery.min.js' %}"></script>
+{% block js_scripts %} {% endblock %}
 </html>

@@ -2,6 +2,8 @@ import logging
 
 import requests
 from django.conf import settings
+from django.shortcuts import render
+from django.views import View
 from rest_framework.views import APIView
 from rest_framework.response import Response
 
@@ -11,13 +13,21 @@ from manager.models import DirtyImage
 logger = logging.getLogger(__name__)
 
 
+class ControlPanel(View):
+    template_name = "manager/control-panel.html"
+    def get(self, request):
+        return render(request, self.template_name, {})
+
+
 class UploadDirtyImage(APIView):
     def post(self, request, *args, **kwargs):
         dirty_image = request.FILES.get("file")
         if dirty_image is None:
             return Response(
                 data={
-                    "message" : "Mising file",
+                    "message" : {
+                        "error" : "Mising file"
+                    },
                 }, 
                 status=400
             )
@@ -26,10 +36,13 @@ class UploadDirtyImage(APIView):
         )
         return Response(
             data={
-                "message" : "Dirty image saved."
+                "message" : {
+                    "status" : "Dirty image saved."
+                }
             }, 
             status=200
         )
+
 
 class EnvStats(APIView):
     def get(self, request, *args, **kwargs):
@@ -46,25 +59,33 @@ class EnvStats(APIView):
             logger.info(str(error))
             return Response(
                 data={
-                    "message" : str(error)
+                    "message" : {
+                        "error" : str(error)
+                    }
                 }, status=400
             )
-        data = {
-            "message" : {
-                "env-stats" : resp.json()
-            }
-        }
-        return Response(data=data, status=200)
+        return Response(
+            data={
+                "message" : {
+                    "env-stats" : resp.json()
+                }
+            }, 
+            status=200
+        )
 
 
 class EnvSwitch(APIView):
     def post(self, request, *args, **kwargs):
         status = request.data.get("status")
         if status is None:
-            data = {
-                "message" : "Missing status on request body"
-            }
-            return Response(data=data, status=400)
+            return Response(
+                data={
+                    "message" : {
+                        "error" : "Missing status on request body"
+                    }
+                }, 
+                status=400
+            )
         try:
             resp = requests.post(
                 "%s/%s" % (
@@ -79,33 +100,106 @@ class EnvSwitch(APIView):
                 raise Exception("Unable to set status %s" % status) from None
         except Exception as error:
             logger.info(str(error))
-            data = {
-                "message" : str(error)
-            }
-            return Response(data=data, status=400)
-        data = {
-            "message" : {
-                "status" : "Feed is %s" % status
-            }
-        }
-        return Response(data=data, status=200)
+            return Response(
+                data={
+                    "message" : {
+                        "error" : str(error)
+                    }
+                }, 
+                status=400
+            )
+        return Response(
+            data={
+                "message" : {
+                    "status" : "Feed is %s" % status
+                }
+            }, 
+            status=200
+        )
 
 
 class TriggerUpload(APIView):
     def post(self, request, *args, **kwargs):
-        raise NotImplementedError()
+        try:
+            resp = requests.post(
+                "%s/%s" % (
+                    settings.FEED_URL,
+                    "upload-images"
+                )
+            )
+            if resp.status_code != 200:
+                raise Exception("Unable to fetch images") from None
+        except Exception as error:
+            logger.info(str(error))
+            return Response(
+                data={
+                    "message" : {
+                        "error" : str(error)
+                    }
+                }, 
+                status=400
+            )
+        return Response(
+            data={
+                "message" : {
+                    "status" : "New images fetched" 
+                }
+            }, 
+            status=200
+        )
 
 
 class AddBlog(APIView):
     def post(self, request, *args, **kwargs):
-        raise NotImplementedError()
-
-
-class DeleteBlog(APIView):
-    def post(self, request, *args, **kwargs):
-        raise NotImplementedError()
+        if request.data.get("blog") is None:
+            data = {
+                "message" : {
+                    "error" : "Missing blog in the request body"
+                }
+            }
+            return Response(data=data, status=400)
+        try:
+            resp = requests.post(
+                "%s/%s" % (
+                    settings.FEED_URL,
+                    "add-blog"
+                ),
+                data={
+                    "blog" : request.data.get("blog")
+                }
+            )
+        except Exception as error:
+            logger.exception(str(error))
+            data = {
+                "message" : "Unable to add %s" % request.data.get("blog")
+            }
+            return Response(data=data, status=400)
 
 
 class GetBlogs(APIView):
     def get(self, request, *args, **kwargs):
-        raise NotImplementedError()
+        try:
+            resp = requests.get(
+                "%s/%s" % (
+                    settings.FEED_URL, 
+                    "get-blogs"
+                )
+            )
+        except Exception as error:
+            logger.exception(str(error))
+            return Response(
+                data={
+                    "message" : {
+                        "error" : str(error)
+                    }
+                }, 
+                status=400
+            )
+        return Response(
+            data={
+                "message" : {
+                    "status" : resp.json()
+                }
+            }, 
+            status=200
+        )
