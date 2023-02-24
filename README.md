@@ -2,14 +2,7 @@
 
 BDSMLR Collector, publisher, feed.
 
-#### Next Steps (TO DO)
-
-- [ ] Make a small flask/django app for serving and viewing images.
-    - [ ] Trigger pulls by default.
-    - [ ] Add option to repost, reblog downloaded images directly from panel.
-    - [ ] Add asynchronous tasks
-    - [ ] Monitor tasks.
-- [ ] Create docker-compose file.
+### Status IN PROGRESS
 
 ### Run with Docker
 
