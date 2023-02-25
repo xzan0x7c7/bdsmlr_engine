@@ -6,40 +6,58 @@
 {% block title %} 
     Control Panel 
 {% endblock %}
-
 {% block content %}
+<div class="main-panel">
+    <div class="panel-monitor-controls">
+
+    </div>
+</div>
 <div class="main-panel">
     <div class="panel-monitor">
         <div class="panel-buttons">
+            <div class="monitor-control">
+                <button id="on">On</button>
+                <button id="off">Off</button>
+            </div>
             <div class="panel-button">
                 <button id="refresh-feed-stats">
                     Refresh Feed Stats
                 </button>
             </div>
         </div>
-        <pre id="feed-stats">
-
-        </pre>
+        <pre id="feed-stats"></pre>
     </div>
     <div class="panel-monitor">
         <div class="panel-buttons">
+            <div class="monitor-control">
+                <form id="add-blog">
+                    {% csrf_token %}
+                    <label for="blog">Add</label>
+                    <input name="blog" type="url" placeholder="http://blog.bdsml.com"/>
+                    <button type="submit">send</button>
+                </form>
+            </div>
+            <div class="monitor-control">
+                <form id="delete-blog">
+                    {% csrf_token %}
+                    <label for="blog-delete">Del</label>
+                    <input name="blog-delete" type="number" placeholder="Blog ID, eg: 0"/>
+                    <button type="submit">send</button>
+                </form>
+            </div>
             <div class="panel-button">
                 <button id="refresh-loaded-blogs">
-                    Refresh Loaded Blogs
+                    Refresh
                 </button>
             </div>
         </div>
-        <pre id="loaded-blogs">
-
-        </pre>
+        <pre id="loaded-blogs"></pre>
     </div>
 </div>
 {% endblock %}
-
 {% block js_scripts %}
 <script>
     document.addEventListener("DOMContentLoaded", function() {
-
         function feedStats() {
             $.get({
                 url : "{% url 'manager:feed_stats' %}",
@@ -57,10 +75,9 @@
                 }
             })
         }
-
         function getFeedBlogs() {
             $.get({
-                url : "{% url 'manager:get_feed_blogs' %}",
+                url : "{% url 'manager:blogs' %}",
                 success: function(response) {
                     $("#loaded-blogs").text(
                         JSON.stringify(
@@ -75,14 +92,48 @@
                 }
             })
         }
+        function addBlog(e) {
+            e.preventDefault();
+            $.post({
+                url : "{% url 'manager:blogs' %}",
+                data : {"blog" : $("input[name='blog']").val()},
+                headers: {"X-CSRFToken" : "{{ csrf_token }}"},
+                success: function(response) {
+                    getFeedBlogs();
+                    feedStats();
+                },
+                error: function(response) {
+                    alert("Unable to add blog")
+                }
+            })
+        }
+        function deleteBlog(e) {
+            e.preventDefault();
+            $.ajax({
+                url : "{% url 'manager:blogs' %}"+"?blog_id="+$("input[name='blog-delete']").val(),
+                headers: {
+                    "X-CSRFToken" : "{{ csrf_token }}",
+                    "Content-Type" : "application/json"
+                },
+                type: "delete",
+                success: function(response) {
+                    getFeedBlogs();
+                    feedStats(); 
+                },
+                error: function(response) {
+                    console.log(response);
+                }
+            })
+        }
 
         function main() {
-            feedStats()
-            getFeedBlogs()
-            $("#refresh-feed-stats").click(feedStats)
-            $("#refresh-loaded-blogs").click(getFeedBlogs)
+            feedStats();
+            getFeedBlogs();
+            $("#refresh-feed-stats").click(feedStats);
+            $("#refresh-loaded-blogs").click(getFeedBlogs);
+            $("#add-blog").submit(addBlog);
+            $("#delete-blog").submit(deleteBlog)
         }
-        
         main()
     })
 </script>

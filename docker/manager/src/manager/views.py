@@ -2,6 +2,7 @@ import logging
 
 import requests
 from django.conf import settings
+from django.http import QueryDict
 from django.shortcuts import render
 from django.views import View
 from rest_framework.views import APIView
@@ -67,7 +68,7 @@ class EnvStats(APIView):
         return Response(
             data={
                 "message" : {
-                    "env-stats" : resp.json()
+                    "env_stats" : resp.json()
                 }
             }, 
             status=200
@@ -149,34 +150,7 @@ class TriggerUpload(APIView):
         )
 
 
-class AddBlog(APIView):
-    def post(self, request, *args, **kwargs):
-        if request.data.get("blog") is None:
-            data = {
-                "message" : {
-                    "error" : "Missing blog in the request body"
-                }
-            }
-            return Response(data=data, status=400)
-        try:
-            resp = requests.post(
-                "%s/%s" % (
-                    settings.FEED_URL,
-                    "add-blog"
-                ),
-                data={
-                    "blog" : request.data.get("blog")
-                }
-            )
-        except Exception as error:
-            logger.exception(str(error))
-            data = {
-                "message" : "Unable to add %s" % request.data.get("blog")
-            }
-            return Response(data=data, status=400)
-
-
-class GetBlogs(APIView):
+class BlogsEndpoint(APIView):
     def get(self, request, *args, **kwargs):
         try:
             resp = requests.get(
@@ -201,5 +175,88 @@ class GetBlogs(APIView):
                     "status" : resp.json()
                 }
             }, 
+            status=200
+        )
+
+    def post(self, request, *args, **kwargs):
+        if request.data.get("blog") is None:
+            data = {
+                "message" : {
+                    "error" : "Missing blog in the request body"
+                }
+            }
+            return Response(
+                data=data, 
+                status=400
+            )
+        try:
+            resp = requests.post(
+                "%s/%s" % (
+                    settings.FEED_URL,
+                    "add-blog"
+                ),
+                data={
+                    "blog" : request.data.get("blog")
+                }
+            )
+        except Exception as error:
+            logger.exception(str(error))
+            return Response(
+                data={
+                    "message" : {
+                        "error" : "Unable to add %s" % request.data.get("blog")
+                    }
+                }, 
+                status=400
+            )
+        return Response(
+            data={
+                "message" : {
+                    "data" : resp.json()
+                }
+            }, 
+            status=200
+        )
+    def delete(self, request):
+        blog_id = request.GET.get("blog_id")
+        if blog_id is None:
+            return Response(
+                data={
+                    "message" : {
+                        "error" : "Missing blog_id in request body"
+                    }
+                }, 
+                status=400
+            )
+        try:
+            resp = requests.post(
+                "%s/%s" % (
+                    settings.FEED_URL, 
+                    "delete-blog"
+                ),
+                data={
+                    "blog" : blog_id
+                }
+            )
+            if resp.status_code != 200:
+                raise Exception(
+                    "Unable to delete %s" % blog_id
+                ) from None
+        except Exception as error:
+            logger.error(str(error))
+            return Response(
+                data={
+                    "message" : {
+                        "error" : str(error)
+                    }
+                },
+                status=400
+            )
+        return Response(
+            data={
+                "message" : {
+                    "data" : resp.json()
+                }
+            },
             status=200
         )

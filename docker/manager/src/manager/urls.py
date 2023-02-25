@@ -27,13 +27,8 @@ urlpatterns = [
         name="trigget_upload"
     ),
     path(
-        "add-feed-blog",
-        view=views.AddBlog.as_view(),
-        name="add_feed_blog"
+        "blogs",
+        view=views.BlogsEndpoint.as_view(),
+        name="blogs"
     ),
-    path(
-        "get-feed-blogs",
-        view=views.GetBlogs.as_view(),
-        name="get_feed_blogs"
-    )
 ]

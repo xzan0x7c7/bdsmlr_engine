@@ -234,7 +234,7 @@ def add_blog():
         return jsonify(
             status=False,
             message="missing blog"
-        )
+        ), 400
     if not Env.add_blog(blog):
         return jsonify(
             status=False, 
