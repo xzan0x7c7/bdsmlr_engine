@@ -217,6 +217,7 @@ class BlogsEndpoint(APIView):
             }, 
             status=200
         )
+
     def delete(self, request):
         blog_id = request.GET.get("blog_id")
         if blog_id is None:
