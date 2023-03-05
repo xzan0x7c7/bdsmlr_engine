@@ -1,4 +1,5 @@
 import logging
+import re
 
 import requests
 from django.conf import settings
@@ -17,7 +18,9 @@ logger = logging.getLogger(__name__)
 class ControlPanel(View):
     template_name = "manager/control-panel.html"
     def get(self, request):
-        return render(request, self.template_name, {})
+        images = DirtyImage.objects.all()
+        data = {"images" : images}
+        return render(request, self.template_name, data)
 
 
 class UploadDirtyImage(APIView):
@@ -189,7 +192,36 @@ class BlogsEndpoint(APIView):
                 data=data, 
                 status=400
             )
+        if not request.data.get("blog").endswith("bdsmlr.com"):
+            data = {
+                "message" : {
+                    "error" : "Only bdsmlr.com blogs allowed."
+                }
+            }
+            return Response(
+                data=data, 
+                status=400
+            )
         try:
+            check = requests.get(request.data.get("blog"))
+            if check.status_code != 200:
+                raise Exception(
+                    "%s does not exist, pinged and obtained %s" % (
+                        request.data.get("blog"),
+                        check.status_code
+                    )
+                )
+            check = re.search(
+                r'This blog doesn\'t exist\.',
+                check.content.decode("utf-8")
+            )
+            if check is not None:
+                raise Exception(
+                    "%s does not exist, pinged and obtained %s" % (
+                        request.data.get("blog"),
+                        "This blog doesn't exist"
+                    )
+                )
             resp = requests.post(
                 "%s/%s" % (
                     settings.FEED_URL,
@@ -204,7 +236,10 @@ class BlogsEndpoint(APIView):
             return Response(
                 data={
                     "message" : {
-                        "error" : "Unable to add %s" % request.data.get("blog")
+                        "error" : "Unable to add %s: Reason: %s" % (
+                            request.data.get("blog"),
+                            str(error)
+                        )
                     }
                 }, 
                 status=400

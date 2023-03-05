@@ -4,6 +4,7 @@ import logging
 import os
 import subprocess
 import sys
+import time
 
 import requests
 from flask import Flask, jsonify, request
@@ -77,6 +78,7 @@ class Environment(object):
         if not self.on:
             return False
         for each in self.blogs:
+            time.sleep(3)
             logger.info("getting blog: %s" % self.blogs[each])
             r1 = subprocess.run(
                 [
@@ -141,8 +143,8 @@ Env = Environment()
 @scheduler.task(
     'cron', 
     id='make_runs', 
-    hour="*/1",
-    minute="2"
+    #hour="*/1",
+    minute="*/2"
 )
 def make_runs():
     try:
