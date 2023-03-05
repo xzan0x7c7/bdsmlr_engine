@@ -24,7 +24,7 @@ urlpatterns = [
     path(
         "trigger-upload",
         view=views.TriggerUpload.as_view(),
-        name="trigget_upload"
+        name="trigger_upload"
     ),
     path(
         "blogs",
